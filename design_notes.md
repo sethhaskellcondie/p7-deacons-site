@@ -1,8 +1,9 @@
 # Design Notes — The Quorum (Payson 7th Ward Deacons Site)
 
-A lightweight, single-page website for the Payson 7th Ward Deacons Quorum. It
-shows weekly Sunday duties, upcoming events, the yearly youth theme, and a
-photo album. This document explains how the site is built, where its data comes
+A lightweight, static website for the Payson 7th Ward Deacons Quorum. The main
+page shows weekly Sunday duties, upcoming events, the yearly youth theme, and a
+photo album; a second page (`/calendar.html`) shows events and assignments on a
+two-month calendar. This document explains how the site is built, where its data comes
 from, and how to make changes.
 
 ## Architecture at a glance
@@ -38,10 +39,14 @@ made by editing the spreadsheet — no code change, no redeploy of the site.
 
 | Path | Purpose |
 |------|---------|
-| `index.html` | Page shell; loads Google Fonts (Sora, DM Sans) and mounts `#app` |
-| `src/main.ts` | All rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderEvents`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
-| `src/data.ts` | TypeScript interfaces (`Duty`, `QuorumEvent`, `GalleryItem`) and the fallback data arrays |
-| `src/style.css` | All styling |
+| `index.html` | Main page shell; loads Google Fonts (Sora, DM Sans) and mounts `#app` |
+| `calendar.html` | Calendar page shell (`/calendar.html`); same fonts, mounts `#app` |
+| `vite.config.ts` | Multi-page build config listing both HTML entries |
+| `src/main.ts` | Main-page rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderEvents`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
+| `src/calendar.ts` | Calendar-page rendering: two CSS Grid month views (this month + next) of events and assignments; on ≤720 px screens it swaps to an agenda list with All / Events / Assignments filters. Rows like `WEEKLY / SUN` recur on that weekday |
+| `src/shared.ts` | Code shared by both pages: HTML escaping, month/day → `Date` resolution, payload validation, and the localStorage-cache + live-fetch loading strategy |
+| `src/data.ts` | TypeScript interfaces (`Duty`, `QuorumEvent`, `GalleryItem`, `Assignment`) and the fallback data arrays |
+| `src/style.css` | All styling (both pages) |
 | `localFiles/` | Untracked local scratch notes (see `.gitignore`) |
 
 Commands: `npm run dev` (local dev server), `npm run build` (type-check +
