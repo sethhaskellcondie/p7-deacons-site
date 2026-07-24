@@ -18,6 +18,14 @@ export interface GalleryItem {
   ph: string;
 }
 
+export interface Assignment {
+  month: string;
+  day: string;
+  bread: string;
+  lesson: string;
+  note: string;
+}
+
 export const duties: Duty[] = [
   { icon: '🪑', role: 'Set Up Chairs', when: 'Sunday · 7:50 AM', who: 'All Deacons' },
   { icon: '🍞', role: 'Bring Bread', when: 'Sunday · 8:15 AM', who: 'Check the Calendar' },
@@ -43,6 +51,10 @@ export const events: QuorumEvent[] = [
     blurb: "Check the group chat or ask a leader for this week's plan.",
   },
 ];
+
+// Assignments are inherently dated, so an evergreen fallback is impossible —
+// when this is empty, the Duties section shows a "check with a leader" note.
+export const assignments: Assignment[] = [];
 
 export const gallery: GalleryItem[] = [
   { slot: 'med_g1', ph: 'Activity photo' },

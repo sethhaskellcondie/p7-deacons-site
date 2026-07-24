@@ -3,9 +3,11 @@ import {
   duties,
   events,
   gallery,
+  assignments,
   type Duty,
   type QuorumEvent,
   type GalleryItem,
+  type Assignment,
 } from './data';
 import { SCRIPT_URL } from './config';
 
@@ -13,6 +15,7 @@ interface SiteData {
   duties: Duty[];
   events: QuorumEvent[];
   gallery: GalleryItem[];
+  assignments: Assignment[];
 }
 
 // Sheet cells are user-entered text landing in innerHTML — escape them.
@@ -71,7 +74,62 @@ function renderHero(): string {
   `;
 }
 
-function renderDuties(items: Duty[]): string {
+// The next two Sundays of bread/lesson assignments. Rows without a parseable
+// date (blank day, stray notes) are dropped rather than sorted to the top.
+const ASSIGNMENT_COUNT = 2;
+
+function upcomingAssignments(items: Assignment[]): Assignment[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return items
+    .map((a) => ({ a, date: resolveDate(a.month, a.day, today) }))
+    .filter((x): x is { a: Assignment; date: Date } => x.date !== null && x.date >= today)
+    .sort((x, y) => x.date.getTime() - y.date.getTime())
+    .slice(0, ASSIGNMENT_COUNT)
+    .map(({ a }) => a);
+}
+
+function renderAssignmentCard(a: Assignment): string {
+  const note = a.note.trim()
+    ? `<p class="assignment-card__note">${esc(a.note)}</p>`
+    : '';
+  return `
+    <div class="assignment-card">
+      <div class="assignment-card__date">
+        <div class="assignment-card__day">${esc(a.day)}</div>
+        <div class="assignment-card__mon">${esc(a.month)}</div>
+      </div>
+      <div class="assignment-card__body">
+        <div class="assignment-card__row">
+          <span class="assignment-card__label">Bread</span>
+          <span class="assignment-card__value">${esc(a.bread.trim() || '—')}</span>
+        </div>
+        <div class="assignment-card__row">
+          <span class="assignment-card__label">Lesson</span>
+          <span class="assignment-card__value">${esc(a.lesson.trim() || '—')}</span>
+        </div>
+        ${note}
+      </div>
+    </div>
+  `;
+}
+
+function renderAssignments(items: Assignment[]): string {
+  const upcoming = upcomingAssignments(items);
+  const body = upcoming.length
+    ? `<div class="assignments__grid">${upcoming.map(renderAssignmentCard).join('')}</div>`
+    : `<p class="assignments__empty">Assignments haven't been posted yet — check with a leader.</p>`;
+
+  return `
+    <div class="assignments">
+      <h3 class="assignments__title">ASSIGNMENTS</h3>
+      <p class="assignments__sub">Here is who is on deck for the next two weeks.</p>
+      ${body}
+    </div>
+  `;
+}
+
+function renderDuties(items: Duty[], assignmentItems: Assignment[]): string {
   const cards = items
     .map(
       (a) => `
@@ -98,6 +156,7 @@ function renderDuties(items: Duty[]): string {
           We all have a part to play. Here is how our quorum serves each Sunday.
         </p>
         <div class="duties__grid">${cards}</div>
+        ${renderAssignments(assignmentItems)}
       </div>
     </section>
   `;
@@ -114,11 +173,11 @@ const MONTHS = [
 // anything more than 6 months in the past is assumed to be next year's
 // event (e.g. a JAN row entered in December). Returns null for rows that
 // aren't calendar dates (e.g. the recurring "WEEKLY" fallback rows).
-function eventDate(ev: QuorumEvent, today: Date): Date | null {
-  const day = Number.parseInt(ev.day, 10);
+function resolveDate(month: string, dayText: string, today: Date): Date | null {
+  const day = Number.parseInt(dayText, 10);
   if (!Number.isInteger(day) || day < 1 || day > 31) return null;
 
-  const raw = ev.month.trim().toUpperCase();
+  const raw = month.trim().toUpperCase();
   let monthIdx = MONTHS.indexOf(raw.slice(0, 3));
   if (monthIdx === -1) {
     const n = Number.parseInt(raw, 10);
@@ -139,7 +198,7 @@ function upcomingEvents(items: QuorumEvent[]): QuorumEvent[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return items
-    .map((ev) => ({ ev, date: eventDate(ev, today) }))
+    .map((ev) => ({ ev, date: resolveDate(ev.month, ev.day, today) }))
     .filter(({ date }) => date === null || date >= today)
     .sort(
       (a, b) =>
@@ -258,25 +317,37 @@ function hasFields(rows: unknown[], fields: string[]): boolean {
   );
 }
 
-function isSiteData(value: unknown): value is SiteData {
-  if (typeof value !== 'object' || value === null) return false;
+// Validates the payload shape and returns it normalized, or null if it's
+// unusable. `assignments` is newer than the other tabs, so a payload from an
+// older script deployment (or an old cache entry) without it is still
+// accepted and defaults to empty.
+function parseSiteData(value: unknown): SiteData | null {
+  if (typeof value !== 'object' || value === null) return null;
   const v = value as Record<string, unknown>;
-  return (
+  const assignmentRows = v.assignments ?? [];
+  const ok =
     Array.isArray(v.duties) &&
     Array.isArray(v.events) &&
     Array.isArray(v.gallery) &&
+    Array.isArray(assignmentRows) &&
     hasFields(v.duties, ['icon', 'role', 'when', 'who']) &&
     hasFields(v.events, ['month', 'day', 'time', 'title', 'blurb']) &&
-    hasFields(v.gallery, ['slot', 'ph'])
-  );
+    hasFields(v.gallery, ['slot', 'ph']) &&
+    hasFields(assignmentRows, ['month', 'day', 'bread', 'lesson', 'note']);
+  if (!ok) return null;
+  return {
+    duties: v.duties as Duty[],
+    events: v.events as QuorumEvent[],
+    gallery: v.gallery as GalleryItem[],
+    assignments: assignmentRows as Assignment[],
+  };
 }
 
 function readCachedData(): SiteData | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    return isSiteData(parsed) ? parsed : null;
+    return parseSiteData(JSON.parse(raw));
   } catch {
     return null;
   }
@@ -284,7 +355,7 @@ function readCachedData(): SiteData | null {
 
 function rerenderDataSections(data: SiteData): void {
   const sections: Array<[string, string]> = [
-    ['#duties', renderDuties(data.duties)],
+    ['#duties', renderDuties(data.duties, data.assignments)],
     ['#calendar', renderCalendar(upcomingEvents(data.events))],
     ['#media', renderAlbum(data.gallery)],
   ];
@@ -300,13 +371,14 @@ async function loadLiveData(): Promise<void> {
     const res = await fetch(SCRIPT_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const payload: unknown = await res.json();
-    if (!isSiteData(payload)) throw new Error('unexpected payload shape');
+    const data = parseSiteData(payload);
+    if (!data) throw new Error('unexpected payload shape');
     try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     } catch {
       // Cache is best-effort; render regardless.
     }
-    rerenderDataSections(payload);
+    rerenderDataSections(data);
   } catch (err) {
     console.warn('[quorum] Live data unavailable; showing fallback data.', err);
   }
@@ -315,10 +387,10 @@ async function loadLiveData(): Promise<void> {
 const app = document.querySelector<HTMLDivElement>('#app');
 
 if (app) {
-  const initial = readCachedData() ?? { duties, events, gallery };
+  const initial = readCachedData() ?? { duties, events, gallery, assignments };
   app.innerHTML = [
     renderHero(),
-    renderDuties(initial.duties),
+    renderDuties(initial.duties, initial.assignments),
     renderCalendar(upcomingEvents(initial.events)),
     renderTheme(),
     renderAlbum(initial.gallery),

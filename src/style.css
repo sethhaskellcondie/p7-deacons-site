@@ -401,6 +401,114 @@ a:hover {
   font-size: 15px;
 }
 
+/* ---------- Assignments (Duties subsection) ---------- */
+
+.assignments {
+  margin-top: 56px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.assignments__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.3px;
+  color: #fff;
+  margin: 0 0 6px;
+}
+
+.assignments__sub {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  margin: 0 0 28px;
+}
+
+.assignments__empty {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 15px;
+  margin: 0;
+}
+
+.assignments__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.assignment-card {
+  display: flex;
+  gap: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  padding: 24px 26px;
+  transition: background 0.18s, transform 0.18s;
+}
+
+.assignment-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-4px);
+}
+
+.assignment-card__date {
+  flex: 0 0 auto;
+  text-align: center;
+  font-family: var(--font-display);
+}
+
+.assignment-card__day {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--cyan);
+  line-height: 1;
+}
+
+.assignment-card__mon {
+  font-size: 12px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 4px;
+}
+
+.assignment-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.assignment-card__row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.assignment-card__row + .assignment-card__row {
+  margin-top: 8px;
+}
+
+.assignment-card__label {
+  flex: 0 0 58px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-weight: 800;
+}
+
+.assignment-card__value {
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.assignment-card__note {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+}
+
 /* ---------- Calendar ---------- */
 
 .calendar {

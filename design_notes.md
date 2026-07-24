@@ -86,6 +86,18 @@ Tab **Events** → `QuorumEvent[]`:
 |-------|-----|------|-------|-------|
 | AUG | 06 | 7:00 PM | Capture the Flag Night | Meet at the church field… |
 
+Tab **Assignments** → `Assignment[]` (weekly Sunday bread/lesson roster; cells
+may be blank — e.g. a General Conference week has no bread row, and `note`
+is usually empty):
+
+| month | day | bread | lesson | note |
+|-------|-----|-------|--------|------|
+| JUL | 26 | Dallen B. | Korbin / Bro. Seth Condie | |
+| OCT | 4 | | | General Conference |
+
+The site shows only the next two upcoming rows (by month/day, same year-wrap
+logic as events) as an "Assignments" subsection under the Duties cards.
+
 Tab **Gallery** → `GalleryItem[]`:
 
 | slot | ph |
@@ -108,6 +120,7 @@ function doGet() {
     duties: tabToObjects(ss.getSheetByName('Duties')),
     events: tabToObjects(ss.getSheetByName('Events')),
     gallery: tabToObjects(ss.getSheetByName('Gallery')),
+    assignments: tabToObjects(ss.getSheetByName('Assignments')),
   };
   return ContentService.createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
