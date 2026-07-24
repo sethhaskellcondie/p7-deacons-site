@@ -303,16 +303,16 @@ a:hover {
   flex-wrap: wrap;
 }
 
-/* ---------- Assignments ---------- */
+/* ---------- Duties ---------- */
 
-.assignments {
+.duties {
   position: relative;
   overflow: hidden;
   background: var(--ink);
   padding: 96px var(--pad-x);
 }
 
-.assignments__accent {
+.duties__accent {
   left: -40px;
   top: 60px;
   width: 150px;
@@ -322,26 +322,26 @@ a:hover {
   transform: rotate(18deg);
 }
 
-.assignments__inner {
+.duties__inner {
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.assignments__sub {
+.duties__sub {
   color: rgba(255, 255, 255, 0.6);
   font-size: 17px;
   margin: 0 0 40px;
   max-width: 560px;
 }
 
-.assignments__grid {
+.duties__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
 }
 
-.assignment-card {
+.duty-card {
   position: relative;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -350,12 +350,12 @@ a:hover {
   transition: background 0.18s, transform 0.18s;
 }
 
-.assignment-card:hover {
+.duty-card:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-4px);
 }
 
-.assignment-card__icon {
+.duty-card__icon {
   width: 52px;
   height: 52px;
   border-radius: 14px;
@@ -367,7 +367,7 @@ a:hover {
   margin-bottom: 18px;
 }
 
-.assignment-card__role {
+.duty-card__role {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 19px;
@@ -375,18 +375,18 @@ a:hover {
   margin: 0 0 6px;
 }
 
-.assignment-card__when {
+.duty-card__when {
   margin: 0 0 16px;
   color: rgba(255, 255, 255, 0.55);
   font-size: 14px;
 }
 
-.assignment-card__assigned {
+.duty-card__assigned {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 14px;
 }
 
-.assignment-card__assigned-label {
+.duty-card__assigned-label {
   font-family: var(--font-display);
   font-size: 11px;
   letter-spacing: 1.5px;
@@ -395,7 +395,7 @@ a:hover {
   margin-bottom: 6px;
 }
 
-.assignment-card__who {
+.duty-card__who {
   color: #fff;
   font-weight: 600;
   font-size: 15px;

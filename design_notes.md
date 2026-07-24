@@ -1,7 +1,7 @@
 # Design Notes — The Quorum (Payson 7th Ward Deacons Site)
 
 A lightweight, single-page website for the Payson 7th Ward Deacons Quorum. It
-shows weekly Sunday assignments, upcoming events, the yearly youth theme, and a
+shows weekly Sunday duties, upcoming events, the yearly youth theme, and a
 photo album. This document explains how the site is built, where its data comes
 from, and how to make changes.
 
@@ -39,8 +39,8 @@ made by editing the spreadsheet — no code change, no redeploy of the site.
 | Path | Purpose |
 |------|---------|
 | `index.html` | Page shell; loads Google Fonts (Sora, DM Sans) and mounts `#app` |
-| `src/main.ts` | All rendering. Pure functions that return HTML strings (`renderHero`, `renderAssignments`, `renderCalendar`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
-| `src/data.ts` | TypeScript interfaces (`Assignment`, `QuorumEvent`, `GalleryItem`) and the fallback data arrays |
+| `src/main.ts` | All rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderCalendar`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
+| `src/data.ts` | TypeScript interfaces (`Duty`, `QuorumEvent`, `GalleryItem`) and the fallback data arrays |
 | `src/style.css` | All styling |
 | `localFiles/` | Untracked local scratch notes (see `.gitignore`) |
 
@@ -74,7 +74,7 @@ values are the JSON field names** — they must match the interfaces in
 `src/data.ts` exactly (case-sensitive). Keep row 1 frozen and don't rename
 headers.
 
-Tab **Assignments** → `Assignment[]`:
+Tab **Duties** → `Duty[]`:
 
 | icon | role | when | who |
 |------|------|------|-----|
@@ -105,7 +105,7 @@ script editor and mirror any changes here in the doc if the shape changes).
 function doGet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const payload = {
-    assignments: tabToObjects(ss.getSheetByName('Assignments')),
+    duties: tabToObjects(ss.getSheetByName('Duties')),
     events: tabToObjects(ss.getSheetByName('Events')),
     gallery: tabToObjects(ss.getSheetByName('Gallery')),
   };
@@ -145,7 +145,7 @@ Loading strategy (in order):
    blank and cold starts are invisible.
 2. `fetch(SCRIPT_URL)` in the background; on success, validate the shape
    (arrays present, expected keys on the first element) and re-render the
-   assignments/calendar/album sections with the live data.
+   duties/calendar/album sections with the live data.
 3. Optionally cache the last good payload in `localStorage` and prefer it over
    the hardcoded arrays on the next visit.
 4. On any failure (network, quota, malformed data), keep the fallback render
@@ -157,7 +157,7 @@ returns data we consider publishable.
 
 ## How to make updates
 
-**Change site content (events, assignments, gallery captions):** edit the
+**Change site content (events, duties, gallery captions):** edit the
 Google Sheet. Changes are live on the next page load — no build, no deploy.
 This is the only step leaders ever need.
 
