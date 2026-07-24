@@ -39,7 +39,7 @@ made by editing the spreadsheet — no code change, no redeploy of the site.
 | Path | Purpose |
 |------|---------|
 | `index.html` | Page shell; loads Google Fonts (Sora, DM Sans) and mounts `#app` |
-| `src/main.ts` | All rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderCalendar`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
+| `src/main.ts` | All rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderEvents`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
 | `src/data.ts` | TypeScript interfaces (`Duty`, `QuorumEvent`, `GalleryItem`) and the fallback data arrays |
 | `src/style.css` | All styling |
 | `localFiles/` | Untracked local scratch notes (see `.gitignore`) |
@@ -158,7 +158,7 @@ Loading strategy (in order):
    blank and cold starts are invisible.
 2. `fetch(SCRIPT_URL)` in the background; on success, validate the shape
    (arrays present, expected keys on the first element) and re-render the
-   duties/calendar/album sections with the live data.
+   duties/events/album sections with the live data.
 3. Optionally cache the last good payload in `localStorage` and prefer it over
    the hardcoded arrays on the next visit.
 4. On any failure (network, quota, malformed data), keep the fallback render

@@ -28,9 +28,9 @@ export interface Assignment {
 
 export const duties: Duty[] = [
   { icon: '🪑', role: 'Set Up Chairs', when: 'Sunday · 7:50 AM', who: 'All Deacons' },
-  { icon: '🍞', role: 'Bring Bread', when: 'Sunday · 8:15 AM', who: 'Check the Calendar' },
+  { icon: '🍞', role: 'Bring Bread', when: 'Sunday · 8:15 AM', who: 'See Assignments' },
   { icon: '💧', role: 'Pass the Sacrament', when: 'Sunday · 8:30 AM', who: 'All Deacons' },
-  { icon: '📖', role: 'Sunday Lesson', when: 'Sunday · 9:30 AM', who: 'Check the Calendar' },
+  { icon: '📖', role: 'Sunday Lesson', when: 'Sunday · 9:30 AM', who: 'See Assignments' },
 ];
 
 // Evergreen fallback: shown only until live sheet data loads (or if it

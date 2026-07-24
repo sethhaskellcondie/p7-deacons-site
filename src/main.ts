@@ -40,7 +40,7 @@ function renderNav(): string {
       </div>
       <div class="nav__links">
         <a href="#duties">Duties</a>
-        <a href="#calendar">Calendar</a>
+        <a href="#events">Events</a>
         <a href="#theme">Theme</a>
         <a href="#media">Album</a>
       </div>
@@ -66,7 +66,7 @@ function renderHero(): string {
           Good things are happening every week in the Payson 7th Ward Deacon's Quorum. Serve hard, laugh harder, and grow together with the quorum.
         </p>
         <div class="hero__actions">
-          <a href="#calendar" class="btn btn--primary">See What's Next</a>
+          <a href="#events" class="btn btn--primary">See What's Next</a>
           <a href="#media" class="btn btn--ghost">Watch Latest ▶</a>
         </div>
       </div>
@@ -151,7 +151,7 @@ function renderDuties(items: Duty[], assignmentItems: Assignment[]): string {
       <div class="accent-square duties__accent"></div>
       <div class="duties__inner">
         <div class="eyebrow eyebrow--cyan">Priesthood duties</div>
-        <h2 class="section-title section-title--light">DUTIES</h2>
+        <h2 class="section-title section-title--light">SUNDAY SERVICES</h2>
         <p class="duties__sub">
           We all have a part to play. Here is how our quorum serves each Sunday.
         </p>
@@ -172,7 +172,7 @@ const MONTHS = [
 // Sheet rows have no year column, so resolve month/day against today:
 // anything more than 6 months in the past is assumed to be next year's
 // event (e.g. a JAN row entered in December). Returns null for rows that
-// aren't calendar dates (e.g. the recurring "WEEKLY" fallback rows).
+// aren't dated events (e.g. the recurring "WEEKLY" fallback rows).
 function resolveDate(month: string, dayText: string, today: Date): Date | null {
   const day = Number.parseInt(dayText, 10);
   if (!Number.isInteger(day) || day < 1 || day > 31) return null;
@@ -208,7 +208,7 @@ function upcomingEvents(items: QuorumEvent[]): QuorumEvent[] {
     .map(({ ev }) => ev);
 }
 
-function renderCalendar(items: QuorumEvent[]): string {
+function renderEvents(items: QuorumEvent[]): string {
   const rows = items
     .map(
       (ev) => `
@@ -221,21 +221,21 @@ function renderCalendar(items: QuorumEvent[]): string {
             <h3 class="event-row__title">${esc(ev.title)}</h3>
             <p class="event-row__meta">${esc(ev.time)} · ${esc(ev.blurb)}</p>
           </div>
-          <a href="#calendar" class="event-row__details">Details →</a>
+          <a href="#events" class="event-row__details">Details →</a>
         </div>
       `,
     )
     .join('');
 
   return `
-    <section id="calendar" class="calendar">
-      <div class="accent-square calendar__accent"></div>
-      <div class="calendar__inner">
-        <div class="calendar__header">
-          <div class="eyebrow eyebrow--teal">On the calendar</div>
+    <section id="events" class="events">
+      <div class="accent-square events__accent"></div>
+      <div class="events__inner">
+        <div class="events__header">
+          <div class="eyebrow eyebrow--teal">Coming up</div>
           <h2 class="section-title section-title--dark">UPCOMING EVENTS</h2>
         </div>
-        <div class="calendar__list">${rows}</div>
+        <div class="events__list">${rows}</div>
       </div>
     </section>
   `;
@@ -356,7 +356,7 @@ function readCachedData(): SiteData | null {
 function rerenderDataSections(data: SiteData): void {
   const sections: Array<[string, string]> = [
     ['#duties', renderDuties(data.duties, data.assignments)],
-    ['#calendar', renderCalendar(upcomingEvents(data.events))],
+    ['#events', renderEvents(upcomingEvents(data.events))],
     ['#media', renderAlbum(data.gallery)],
   ];
   for (const [selector, html] of sections) {
@@ -391,7 +391,7 @@ if (app) {
   app.innerHTML = [
     renderHero(),
     renderDuties(initial.duties, initial.assignments),
-    renderCalendar(upcomingEvents(initial.events)),
+    renderEvents(upcomingEvents(initial.events)),
     renderTheme(),
     renderAlbum(initial.gallery),
     renderFooter(),
