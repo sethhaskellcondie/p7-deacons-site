@@ -1,11 +1,11 @@
-import type { Duty, QuorumEvent, GalleryItem, Assignment } from './data';
+import type { Duty, QuorumEvent, ChallengeName, Assignment } from './data';
 import { SCRIPT_URL } from './config';
 
 export interface SiteData {
   duties: Duty[];
   events: QuorumEvent[];
-  gallery: GalleryItem[];
   assignments: Assignment[];
+  challenge: ChallengeName[];
 }
 
 // Sheet cells are user-entered text landing in innerHTML — escape them.
@@ -48,7 +48,7 @@ export function resolveDate(month: string, dayText: string, today: Date): Date |
   return date;
 }
 
-const CACHE_KEY = 'p7-quorum-data-v2';
+const CACHE_KEY = 'p7-quorum-data-v3';
 
 function hasFields(rows: unknown[], fields: string[]): boolean {
   if (rows.length === 0) return true;
@@ -60,28 +60,29 @@ function hasFields(rows: unknown[], fields: string[]): boolean {
 }
 
 // Validates the payload shape and returns it normalized, or null if it's
-// unusable. `assignments` is newer than the other tabs, so a payload from an
-// older script deployment (or an old cache entry) without it is still
-// accepted and defaults to empty.
+// unusable. `assignments` and `challenge` are newer than the other tabs, so a
+// payload from an older script deployment (or an old cache entry) without them
+// is still accepted and defaults to empty.
 function parseSiteData(value: unknown): SiteData | null {
   if (typeof value !== 'object' || value === null) return null;
   const v = value as Record<string, unknown>;
   const assignmentRows = v.assignments ?? [];
+  const challengeRows = v.challenge ?? [];
   const ok =
     Array.isArray(v.duties) &&
     Array.isArray(v.events) &&
-    Array.isArray(v.gallery) &&
     Array.isArray(assignmentRows) &&
+    Array.isArray(challengeRows) &&
     hasFields(v.duties, ['icon', 'role', 'when', 'who']) &&
     hasFields(v.events, ['month', 'day', 'time', 'title', 'blurb']) &&
-    hasFields(v.gallery, ['slot', 'ph']) &&
-    hasFields(assignmentRows, ['month', 'day', 'bread', 'lesson', 'note']);
+    hasFields(assignmentRows, ['month', 'day', 'bread', 'lesson', 'note']) &&
+    hasFields(challengeRows, ['name', 'date']);
   if (!ok) return null;
   return {
     duties: v.duties as Duty[],
     events: v.events as QuorumEvent[],
-    gallery: v.gallery as GalleryItem[],
     assignments: assignmentRows as Assignment[],
+    challenge: challengeRows as ChallengeName[],
   };
 }
 

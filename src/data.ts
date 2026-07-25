@@ -13,9 +13,9 @@ export interface QuorumEvent {
   blurb: string;
 }
 
-export interface GalleryItem {
-  slot: string;
-  ph: string;
+export interface ChallengeName {
+  name: string;
+  date: string;
 }
 
 export interface Assignment {
@@ -56,9 +56,6 @@ export const events: QuorumEvent[] = [
 // when this is empty, the Duties section shows a "check with a leader" note.
 export const assignments: Assignment[] = [];
 
-export const gallery: GalleryItem[] = [
-  { slot: 'med_g1', ph: 'Activity photo' },
-  { slot: 'med_g2', ph: 'Service project clip' },
-  { slot: 'med_g3', ph: 'Camp photo' },
-  { slot: 'med_g4', ph: 'Testimony video' },
-];
+// Who has recited the Aaronic Priesthood Theme from memory. Like assignments,
+// this is live-only data — an empty list renders the "be the first" note.
+export const challenge: ChallengeName[] = [];

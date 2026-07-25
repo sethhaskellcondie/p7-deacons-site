@@ -2,11 +2,12 @@ import './style.css';
 import {
   duties,
   events,
-  gallery,
   assignments,
+  challenge,
   type Duty,
   type QuorumEvent,
   type Assignment,
+  type ChallengeName,
 } from './data';
 import {
   esc,
@@ -31,7 +32,7 @@ function renderNav(): string {
         <a href="#events">Events</a>
         <a href="calendar.html">Calendar</a>
         <a href="#theme">Theme</a>
-        <a href="#media">Album</a>
+        <a href="#challenge">Challenge</a>
       </div>
     </nav>
   `;
@@ -39,7 +40,7 @@ function renderNav(): string {
 
 function renderHero(): string {
   return `
-    <header class="hero">
+    <header id="top" class="hero">
       <div class="hero__facet hero__facet--1"></div>
       <div class="hero__facet hero__facet--2"></div>
       <div class="hero__facet hero__facet--3"></div>
@@ -55,8 +56,8 @@ function renderHero(): string {
           Good things are happening every week in the Payson 7th Ward Deacon's Quorum. Serve hard, laugh harder, and grow together with the quorum.
         </p>
         <div class="hero__actions">
-          <a href="#events" class="btn btn--primary">See What's Next</a>
-          <a href="#media" class="btn btn--ghost">Watch Latest ▶</a>
+          <a href="#events" class="btn btn--primary">Upcoming Events</a>
+          <a href="#challenge" class="btn btn--ghost">Take the Challenge</a>
         </div>
       </div>
     </header>
@@ -180,7 +181,7 @@ function renderEvents(items: QuorumEvent[]): string {
             <h3 class="event-row__title">${esc(ev.title)}</h3>
             <p class="event-row__meta">${esc(ev.time)} · ${esc(ev.blurb)}</p>
           </div>
-          <a href="#events" class="event-row__details">Details →</a>
+          <div class="event-row__time">${esc(ev.time)}</div>
         </div>
       `,
     )
@@ -216,33 +217,57 @@ function renderTheme(): string {
   `;
 }
 
-function renderAlbum(items: SiteData['gallery']): string {
-  const tiles = items
-    .map(
-      (g) => `
-        <div class="album__tile">
-          <div class="image-placeholder" id="${esc(g.slot)}">${esc(g.ph)}</div>
-        </div>
-      `,
-    )
-    .join('');
+const CHALLENGE_VIDEO_ID = 'lwbmCcON_yg';
 
+function renderChallengeNames(items: ChallengeName[]): string {
+  if (!items.length) {
+    return `<p class="challenge__empty">No one yet — be the first to pass it off!</p>`;
+  }
+  const rows = items
+    .map((c) => {
+      const date = c.date.trim()
+        ? `<span class="challenge__date">${esc(c.date)}</span>`
+        : '';
+      return `
+        <li class="challenge__name">
+          <span class="challenge__check">✓</span>
+          <span class="challenge__who">${esc(c.name)}</span>
+          ${date}
+        </li>
+      `;
+    })
+    .join('');
+  return `<ol class="challenge__names">${rows}</ol>`;
+}
+
+function renderChallenge(items: ChallengeName[]): string {
   return `
-    <section id="media" class="album">
-      <div class="accent-square album__accent"></div>
-      <div class="album__inner">
-        <div class="album__header">
-          <div>
-            <div class="eyebrow eyebrow--teal">Life in the quorum</div>
-            <h2 class="section-title section-title--dark">Album</h2>
-          </div>
-          <a href="#media" class="album__gallery-link">See the full gallery →</a>
+    <section id="challenge" class="challenge">
+      <div class="accent-square challenge__accent"></div>
+      <div class="challenge__inner">
+        <div class="challenge__header">
+          <div class="eyebrow eyebrow--teal">The challenge</div>
+          <h2 class="section-title section-title--dark">MEMORIZE THE THEME</h2>
+          <p class="challenge__sub">
+            Learn the Aaronic Priesthood Theme by heart, then recite it to a leader
+            to pass it off. Watch the video below as many times as it takes.
+          </p>
         </div>
-        <div class="album__grid">
-          <div class="album__featured">
-            <div class="image-placeholder" id="med_feat">Drop a highlight photo</div>
+        <div class="challenge__grid">
+          <div class="challenge__roster">
+            <h3 class="challenge__roster-title">PASSED IT OFF</h3>
+            <div id="challenge-names">${renderChallengeNames(items)}</div>
           </div>
-          ${tiles}
+          <div class="challenge__video">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/${CHALLENGE_VIDEO_ID}"
+              title="Aaronic Priesthood Theme"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+          </div>
         </div>
       </div>
     </section>
@@ -258,9 +283,14 @@ function renderFooter(): string {
           <span class="footer__wordmark">The Quorum · Payson 7th Ward</span>
         </div>
         <div class="footer__links">
-          <a href="#duties">Presidency</a>
+          <a href="#top">Top</a>
           <a href="calendar.html">Calendar</a>
-          <a href="#duties">Ward Website</a>
+          <a
+            href="https://local.churchofjesuschrist.org/en/units/us/ut/payson-7th-ward"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Ward Website</a
+          >
         </div>
       </div>
     </footer>
@@ -271,24 +301,27 @@ function rerenderDataSections(data: SiteData): void {
   const sections: Array<[string, string]> = [
     ['#duties', renderDuties(data.duties, data.assignments)],
     ['#events', renderEvents(upcomingEvents(data.events))],
-    ['#media', renderAlbum(data.gallery)],
   ];
   for (const [selector, html] of sections) {
     const el = document.querySelector(selector);
     if (el) el.outerHTML = html;
   }
+  // Swap only the roster, not the whole section — replacing it would reload the
+  // embedded video and cut off anyone already watching.
+  const names = document.querySelector('#challenge-names');
+  if (names) names.innerHTML = renderChallengeNames(data.challenge);
 }
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
 if (app) {
-  const initial = readCachedData() ?? { duties, events, gallery, assignments };
+  const initial = readCachedData() ?? { duties, events, assignments, challenge };
   app.innerHTML = [
     renderHero(),
     renderDuties(initial.duties, initial.assignments),
     renderEvents(upcomingEvents(initial.events)),
     renderTheme(),
-    renderAlbum(initial.gallery),
+    renderChallenge(initial.challenge),
     renderFooter(),
   ].join('');
   void loadLiveData(rerenderDataSections);

@@ -1,8 +1,8 @@
 # Design Notes — The Quorum (Payson 7th Ward Deacons Site)
 
 A lightweight, static website for the Payson 7th Ward Deacons Quorum. The main
-page shows weekly Sunday duties, upcoming events, the yearly youth theme, and a
-photo album; a second page (`/calendar.html`) shows events and assignments on a
+page shows weekly Sunday duties, upcoming events, the yearly youth theme, and the
+memorization challenge; a second page (`/calendar.html`) shows events and assignments on a
 two-month calendar. This document explains how the site is built, where its data comes
 from, and how to make changes.
 
@@ -42,10 +42,10 @@ made by editing the spreadsheet — no code change, no redeploy of the site.
 | `index.html` | Main page shell; loads Google Fonts (Sora, DM Sans) and mounts `#app` |
 | `calendar.html` | Calendar page shell (`/calendar.html`); same fonts, mounts `#app` |
 | `vite.config.ts` | Multi-page build config listing both HTML entries |
-| `src/main.ts` | Main-page rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderEvents`, `renderTheme`, `renderAlbum`, `renderFooter`), joined into `#app` |
+| `src/main.ts` | Main-page rendering. Pure functions that return HTML strings (`renderHero`, `renderDuties`, `renderEvents`, `renderTheme`, `renderChallenge`, `renderFooter`), joined into `#app` |
 | `src/calendar.ts` | Calendar-page rendering: two CSS Grid month views (this month + next) of events and assignments; on ≤720 px screens it swaps to an agenda list with All / Events / Assignments filters. Rows like `WEEKLY / SUN` recur on that weekday |
 | `src/shared.ts` | Code shared by both pages: HTML escaping, month/day → `Date` resolution, payload validation, and the localStorage-cache + live-fetch loading strategy |
-| `src/data.ts` | TypeScript interfaces (`Duty`, `QuorumEvent`, `GalleryItem`, `Assignment`) and the fallback data arrays |
+| `src/data.ts` | TypeScript interfaces (`Duty`, `QuorumEvent`, `Assignment`, `ChallengeName`) and the fallback data arrays |
 | `src/style.css` | All styling (both pages) |
 | `localFiles/` | Untracked local scratch notes (see `.gitignore`) |
 
@@ -103,11 +103,16 @@ is usually empty):
 The site shows only the next two upcoming rows (by month/day, same year-wrap
 logic as events) as an "Assignments" subsection under the Duties cards.
 
-Tab **Gallery** → `GalleryItem[]`:
+Tab **Challenge** → `ChallengeName[]` (who has recited the Aaronic Priesthood
+Theme from memory; `date` is free text and may be blank):
 
-| slot | ph |
-|------|-----|
-| med_g1 | Activity photo |
+| name | date |
+|------|------|
+| Dallen B. | Jul 2026 |
+
+The Challenge section embeds the theme video (`CHALLENGE_VIDEO_ID` in
+`src/main.ts`) and lists these names beside it. Add a row when someone passes
+it off — first names + last initial only.
 
 Privacy rule for editors: the `who` column may carry first names only. Never
 put phone numbers, addresses, or full names in any column the script returns.
@@ -124,8 +129,8 @@ function doGet() {
   const payload = {
     duties: tabToObjects(ss.getSheetByName('Duties')),
     events: tabToObjects(ss.getSheetByName('Events')),
-    gallery: tabToObjects(ss.getSheetByName('Gallery')),
     assignments: tabToObjects(ss.getSheetByName('Assignments')),
+    challenge: tabToObjects(ss.getSheetByName('Challenge')),
   };
   return ContentService.createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
@@ -163,7 +168,9 @@ Loading strategy (in order):
    blank and cold starts are invisible.
 2. `fetch(SCRIPT_URL)` in the background; on success, validate the shape
    (arrays present, expected keys on the first element) and re-render the
-   duties/events/album sections with the live data.
+   duties/events sections and the challenge roster with the live data. (Only the
+   roster is swapped, not the whole Challenge section — replacing it would
+   reload the embedded video mid-playback.)
 3. Optionally cache the last good payload in `localStorage` and prefer it over
    the hardcoded arrays on the next visit.
 4. On any failure (network, quota, malformed data), keep the fallback render
@@ -175,7 +182,7 @@ returns data we consider publishable.
 
 ## How to make updates
 
-**Change site content (events, duties, gallery captions):** edit the
+**Change site content (events, duties, assignments, challenge names):** edit the
 Google Sheet. Changes are live on the next page load — no build, no deploy.
 This is the only step leaders ever need.
 

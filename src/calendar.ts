@@ -2,8 +2,8 @@ import './style.css';
 import {
   duties,
   events,
-  gallery,
   assignments,
+  challenge,
   type QuorumEvent,
   type Assignment,
 } from './data';
@@ -317,7 +317,7 @@ function renderFooter(): string {
 }
 
 let filter: Filter = 'all';
-let data: SiteData = readCachedData() ?? { duties, events, gallery, assignments };
+let data: SiteData = readCachedData() ?? { duties, events, assignments, challenge };
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
