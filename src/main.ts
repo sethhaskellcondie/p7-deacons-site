@@ -66,7 +66,7 @@ function renderHero(): string {
 
 // The next two Sundays of bread/lesson assignments. Rows without a parseable
 // date (blank day, stray notes) are dropped rather than sorted to the top.
-const ASSIGNMENT_COUNT = 2;
+const ASSIGNMENT_COUNT = 3;
 
 function upcomingAssignments(items: Assignment[]): Assignment[] {
   const today = new Date();
