@@ -113,7 +113,7 @@ function renderAssignments(items: Assignment[]): string {
   return `
     <div class="assignments">
       <h3 class="assignments__title">ASSIGNMENTS</h3>
-      <p class="assignments__sub">Here is who is on deck for the next two weeks.</p>
+      <p class="assignments__sub">Here is who is on deck for the next three weeks.</p>
       ${body}
     </div>
   `;
